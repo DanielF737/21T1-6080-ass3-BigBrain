@@ -7,8 +7,10 @@ import Card from '@material-ui/core/Card'
 import CardContent from '@material-ui/core/CardContent'
 import CardActions from '@material-ui/core/CardActions'
 import Avatar from '@material-ui/core/Avatar'
+import Grid from '@material-ui/core/Grid';
 
 import { QuizContext } from './util/quiz'
+// TODO fix this to use config file across all files
 const api = 'http://localhost:5005/'
 
 /**
@@ -89,7 +91,7 @@ async function getQuizzes () {
 function quizTime (questions) {
   let total = 0
   for (let i = 0; i < questions.length; i++) {
-    total += questions[i].time
+    total += Number(questions[i].time)
   }
   return total
 }
@@ -111,18 +113,24 @@ function Quizzes () {
   }, [quizCount])
 
   return (
-    <div>
+    <>
       {quizzes.map(i => (
-        <>
+        <div key={i.id}>
           {/* TODO fix the width */}
-          <Card key={i.id}>
+          <Card>
             <CardContent>
-              <Typography variant="h5">
-                {/* TODO make this inline */}
-                <Avatar alt="Quiz Thumbnail" src={i.thumbnail} />
-                {i.name}
-              </Typography>
-              <Typography variant="body1">
+              <Grid container direction='row' alignItems='center'>
+                <Avatar
+                  variant='rounded'
+                  display='inline'
+                  alt='Quiz Thumbnail'
+                  src={i.thumbnail}
+                />
+                <Typography variant='h4'>
+                  {i.name}
+                </Typography>
+              </Grid>
+              <Typography variant='body1'>
                 Questions: {i.questions.length} | Time: {quizTime(i.questions)}s
               </Typography>
             </CardContent>
@@ -146,10 +154,10 @@ function Quizzes () {
             </Button>
             </CardActions>
           </Card>
-          <br/>
-        </>
+          <br />
+        </div>
       ))}
-    </div>
+    </>
   )
 }
 
@@ -169,7 +177,7 @@ function Dashboard () {
   return (
     <>
       <br/>
-      <Typography variant="h2" component="h2" gutterBottom>
+      <Typography variant='h3' gutterBottom>
         Dashboard
       </Typography>
       <Quizzes />

@@ -77,43 +77,43 @@ const Login = (props) => {
   const [error, setError] = React.useState('')
 
   return (
-    <Container component="main" maxWidth="xs">
+    <Container component='main' maxWidth='xs'>
       <div className={classes.paper}>
-        <Typography component="h1" variant="h5">
+        <Typography component='h1' variant='h5'>
           Sign in
         </Typography>
         <form className={classes.form} noValidate>
           <br />
-          {error.length > 0 ? <Alert variant="filled" severity="error">{error}</Alert> : <></>}
+          {error.length > 0 ? <Alert variant='filled' severity='error'>{error}</Alert> : <></>}
           <TextField
-            variant="outlined"
-            margin="normal"
+            variant='outlined'
+            margin='normal'
             required
             fullWidth
-            id="email"
-            label="Email Address"
-            name="email"
-            autoComplete="email"
+            id='email'
+            label='Email Address'
+            name='email'
+            autoComplete='email'
             autoFocus
             onChange={(event) => setEmail(event.target.value)}
           />
           <TextField
-            variant="outlined"
-            margin="normal"
+            variant='outlined'
+            margin='normal'
             required
             fullWidth
-            name="password"
-            label="Password"
-            type="password"
-            id="password"
-            autoComplete="current-password"
+            name='password'
+            label='Password'
+            type='password'
+            id='password'
+            autoComplete='current-password'
             onChange={(event) => setPWord(event.target.value)}
           />
           <Button
-            type="submit"
+            type='submit'
             fullWidth
-            variant="contained"
-            color="primary"
+            variant='contained'
+            color='primary'
             className={classes.submit}
             onClick = {(e) => {
               e.preventDefault()
@@ -130,7 +130,7 @@ const Login = (props) => {
           </Button>
           <Grid container>
             <Grid item>
-              <Link href="/register" variant="body2">
+              <Link href='/register' variant='body2'>
                 {'Don\'t have an account? Sign Up'}
               </Link>
             </Grid>
