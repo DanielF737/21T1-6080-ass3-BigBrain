@@ -1,5 +1,5 @@
 import React from 'react'
-// import { useHistory } from 'react-router-dom'
+import { useHistory } from 'react-router-dom'
 
 import Button from '@material-ui/core/Button'
 import TextField from '@material-ui/core/TextField'
@@ -65,9 +65,8 @@ async function login (email, password) {
   return ('')
 }
 
-// TODO add redirect if signed in
-// TOOD integrate with API
 const Login = (props) => {
+  const history = useHistory()
   if (localStorage.getItem('token')) {
     history.push('/')
   }
@@ -117,9 +116,14 @@ const Login = (props) => {
             color="primary"
             className={classes.submit}
             onClick = {(e) => {
-              e.preventDefault();
+              e.preventDefault()
               login(email, pWord)
-                .then(r => setError(r))
+                .then(r => {
+                  setError(r)
+                  if (r === '') {
+                    history.push('/')
+                  }
+                })
             }}
           >
             Sign In

@@ -1,5 +1,5 @@
 import React from 'react'
-// import { useHistory } from 'react-router-dom'
+import { useHistory } from 'react-router-dom'
 
 import Button from '@material-ui/core/Button'
 import TextField from '@material-ui/core/TextField'
@@ -28,7 +28,6 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 async function register (name, email, password, confirm) {
-  // const history = useHistory()
   if (name === '') { return ('Name is blank') }
   if (email === '') { return ('Email is blank') }
   if (password === '') { return ('Password is blank') }
@@ -62,10 +61,12 @@ async function register (name, email, password, confirm) {
   return ('')
 }
 
-// TODO add redirect if signed in
-// TODO add error messages
-// TOOD integrate with API
 const Register = (props) => {
+  const history = useHistory()
+  if (localStorage.getItem('token')) {
+    history.push('/')
+  }
+
   const classes = useStyles()
   const [name, setName] = React.useState('')
   const [email, setEmail] = React.useState('')
@@ -136,9 +137,14 @@ const Register = (props) => {
             color="primary"
             className={classes.submit}
             onClick = {(e) => {
-              e.preventDefault();
+              e.preventDefault()
               register(name, email, pWord, confirm)
-                .then(r => setError(r))
+                .then(r => {
+                  setError(r)
+                  if (r === '') {
+                    history.push('/')
+                  }
+                })
             }}
           >
             Sign Up
