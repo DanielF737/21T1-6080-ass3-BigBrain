@@ -100,7 +100,7 @@ function getCorrectness (results) {
     }
     const obj = {
       question: `Question ${i + 1}`,
-      '% Correct': (total / count) * 100
+      '% Correct': ((total / count) * 100).toFixed(2)
     }
     correctness.push(obj)
   }
