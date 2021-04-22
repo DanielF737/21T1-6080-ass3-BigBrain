@@ -7,7 +7,7 @@ import Card from '@material-ui/core/Card'
 import CardContent from '@material-ui/core/CardContent'
 import Grid from '@material-ui/core/Grid'
 import TextField from '@material-ui/core/TextField'
-import Checkbox from '@material-ui/core/Checkbox';
+import Checkbox from '@material-ui/core/Checkbox'
 import Table from '@material-ui/core/Table'
 import TableBody from '@material-ui/core/TableBody'
 import TableCell from '@material-ui/core/TableCell'
@@ -34,19 +34,19 @@ const useStyles = makeStyles((theme) => ({
  */
 function fileToDataUrl (file) {
   const validFileTypes = ['image/jpeg', 'image/png', 'image/jpg']
-  const valid = validFileTypes.find(type => type === file.type);
+  const valid = validFileTypes.find(type => type === file.type)
   // Bad data, let's walk away.
   if (!valid) {
-    throw Error('provided file is not a png, jpg or jpeg image.');
+    throw Error('provided file is not a png, jpg or jpeg image.')
   }
 
-  const reader = new FileReader();
+  const reader = new FileReader()
   const dataUrlPromise = new Promise((resolve, reject) => {
-    reader.onerror = reject;
-    reader.onload = () => resolve(reader.result);
-  });
-  reader.readAsDataURL(file);
-  return dataUrlPromise;
+    reader.onerror = reject
+    reader.onload = () => resolve(reader.result)
+  })
+  reader.readAsDataURL(file)
+  return dataUrlPromise
 }
 
 /**
@@ -265,7 +265,7 @@ function EditQuestion () {
   const [value, setValue] = React.useState('')
   const [selectedFile, setSelectedFile] = React.useState('')
 
-  const initialRender = useRef(true);
+  const initialRender = useRef(true)
 
   useEffect(() => {
     if (initialRender.current) {
@@ -285,7 +285,7 @@ function EditQuestion () {
     }
   }, [selectedFile])
 
-  const initialRenderB = useRef(true);
+  const initialRenderB = useRef(true)
   useEffect(() => {
     getQuiz(quizId)
       .then(r => {

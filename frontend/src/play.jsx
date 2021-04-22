@@ -42,7 +42,7 @@ const useStyles = makeStyles((theme) => ({
     maxWidth: '500px',
     maxHeight: '500px'
   }
-}));
+}))
 
 async function joinGame (id, uname) {
   const data = {
@@ -158,7 +158,7 @@ function Game ({ id }) {
   const [selected, setSelected] = React.useState([])
   const [results, setResults] = React.useState([])
 
-  const classes = useStyles();
+  const classes = useStyles()
 
   useEffect(() => {
     let playing
@@ -221,7 +221,7 @@ function Game ({ id }) {
   }, [started])
 
   // Get answers when timer runs out
-  const initialRenderA = useRef(true);
+  const initialRenderA = useRef(true)
   useEffect(() => {
     if (initialRenderA.current) {
       initialRenderA.current = false
@@ -236,7 +236,7 @@ function Game ({ id }) {
   }, [remaining])
 
   // Submit answer when it is changed
-  const initialRenderB = useRef(true);
+  const initialRenderB = useRef(true)
   useEffect(() => {
     console.log('selected has been changes')
     if (initialRenderB.current) {
@@ -250,7 +250,7 @@ function Game ({ id }) {
     <>
     {started
       ? <Card>
-          <Grid container direction="column" justify="space-around" alignItems="center">
+          <Grid container direction='column' justify='space-around' alignItems='center'>
             <Typography variant='h3' gutterBottom>{question.text}</Typography>
             {sols === []
               ? <>yeet {console.log(sols)}</>
@@ -258,9 +258,9 @@ function Game ({ id }) {
                   <Typography variant='h4' gutterBottom>{remaining < 0 ? 0 : remaining} seconds remaining</Typography>
                   <br />
                   {'url' in question &&
-                    <Grid container direction="row" justify="space-around">
+                    <Grid container direction='row' justify='space-around'>
                       {question.url.type === 'image'
-                        ? <img className={classes.image} src={question.url.data} alt="Question Image" />
+                        ? <img className={classes.image} src={question.url.data} alt='Question Image' />
                         : <ReactPlayer
                             url={question.url.data}
                           />
@@ -270,7 +270,7 @@ function Game ({ id }) {
                   <br />
                   {'sols' in question && question.sols > 1
                     ? <>
-                    <FormControl component="fieldset">
+                    <FormControl component='fieldset'>
                     {'answers' in question && question.answers.map(i => (
                       <div key={i.id} >
                         {typeof sols !== 'undefined' && sols.length === 0
@@ -319,7 +319,7 @@ function Game ({ id }) {
           </Grid>
       </Card>
       : <Card>
-        <Grid container direction="column" justify="space-around" alignItems="center">
+        <Grid container direction='column' justify='space-around' alignItems='center'>
           {played
             ? <>
               <br />

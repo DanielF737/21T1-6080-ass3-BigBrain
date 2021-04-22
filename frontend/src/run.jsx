@@ -9,12 +9,14 @@ import CardContent from '@material-ui/core/CardContent'
 import CardActions from '@material-ui/core/CardActions'
 import Modal from '@material-ui/core/Modal'
 import IconButton from '@material-ui/core/IconButton'
-import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+import ExitToAppIcon from '@material-ui/icons/ExitToApp'
 import { makeStyles } from '@material-ui/core/styles'
 import Grid from '@material-ui/core/Grid'
-import Chip from '@material-ui/core/Chip';
+import Chip from '@material-ui/core/Chip'
 
 const api = 'http://localhost:5005/'
+
+// Custom styles
 const useStyles = makeStyles((theme) => ({
   paper: {
     position: 'absolute',
@@ -35,10 +37,15 @@ const useStyles = makeStyles((theme) => ({
     maxWidth: '500px',
     maxHeight: '500px'
   }
-}));
+}))
 
-async function stopQuiz (id, sessionId) {
-  let options = {
+/**
+ * Makes the api call to stop the session of a quiz specified by the parameters
+ * @param {*} id the id of the quiz we are stopping
+ */
+async function stopQuiz (id) {
+  // Make the api call
+  const options = {
     method: 'POST',
     headers: {
       'Content-Type': 'application/JSON',
@@ -46,19 +53,14 @@ async function stopQuiz (id, sessionId) {
     }
   }
   await fetch(`${api}admin/quiz/${id}/end`, options)
-
-  options = {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/JSON',
-      Authorization: `Bearer ${localStorage.getItem('token')}`
-    }
-  }
-
-  await fetch(`${api}admin/quiz/${id}`, options)
 }
 
+/**
+ * Makes the api call to advance the current quiz
+ * @param {*} id id of quiz we are advancing
+ */
 async function advanceQuiz (id) {
+  // Make the api call
   const options = {
     method: 'POST',
     headers: {
@@ -88,6 +90,11 @@ async function getQuiz (id) {
   return (out)
 }
 
+/**
+ * Makes an api call to get the status of the specified quiz session
+ * @param {*} id session id of the quiz whos status we want
+ * @returns results object
+ */
 async function getResults (id) {
   const options = {
     method: 'GET',
@@ -100,6 +107,7 @@ async function getResults (id) {
   const r = await fetch(`${api}admin/session/${id}/status`, options)
   const ret = await r.json()
 
+  // If the object contains the results return them (error trapping code)
   if ('results' in ret) {
     return ret.results
   } else {
@@ -107,15 +115,20 @@ async function getResults (id) {
   }
 }
 
+/**
+ * Component that manages the control panel for running a quiz
+ * @returns component
+ */
 function Run () {
   const history = useHistory()
   const { id, sessionId } = useParams()
-  const classes = useStyles();
+  const classes = useStyles()
 
-  const [results, setResults] = React.useState({})
-  const [quiz, setQuiz] = React.useState({})
-  const [modalOpen, setModalOpen] = React.useState(false)
+  const [results, setResults] = React.useState({}) // stores the status object containing players, questions, and time since last opened
+  const [quiz, setQuiz] = React.useState({}) // Stores the current quiz object
+  const [modalOpen, setModalOpen] = React.useState(false) // Stores the state for the modal visibility
 
+  // Handles the closing of the modal
   const handleClose = () => {
     setModalOpen(false)
     history.push('/')
@@ -123,32 +136,33 @@ function Run () {
 
   // Call the api every second to keep up to date on quiz status
   useEffect(() => {
+    // Get the quiz information
     getQuiz(id)
       .then(r => {
         setQuiz(r)
       })
+    // Set up a 1 second loop where we get the current status of the quiz
     const interval = window.setInterval(() => {
       getResults(sessionId)
         .then(r => {
           setResults(r)
         })
     }, 1000)
-    return () => clearInterval(interval)
+    return () => clearInterval(interval) // cleanup
   }, [])
 
   let difference = 0
-
   // Calculate the difference between the time the question started and the
   if ('questions' in results && results.position >= 0) {
     const time = new Date(results.isoTimeLastQuestionStarted)
-    const current = new Date();
+    const current = new Date()
     difference = ((results.questions[results.position].time) - ((current.getTime() / 1000) - (time.getTime() / 1000)))
     if (difference < 0) {
       difference = 0
     }
   }
-  console.log(results)
 
+  // If not logged in, send back to the login screen
   if (!localStorage.getItem('token')) {
     history.push('/login')
   }
@@ -162,17 +176,19 @@ function Run () {
             {'name' in quiz && quiz.name} - {sessionId}
           </Typography>
           {'position' in results && <Typography variant='h5'>
+            {/* Display the current question when not in the lobby (havent advanced into the game) */}
             Current question: {results.position >= 0 ? `${results.questions[results.position].text} (${results.position + 1}/${results.questions.length})` : 'lobby'}
           </Typography>}
           {'position' in results && results.position >= 0 && <Typography variant='h5'>
-            {`Time Remaining: ${difference.toFixed(0)}s`}
+            {`Time Remaining: ${difference.toFixed(0)}s`} {/* Display the time remaining on the current question when a question is active */}
           </Typography>}
           {'questions' in results && results.position >= 0 && 'url' in results.questions[results.position] &&
             <>
             <br />
-            <Grid container direction="row" justify="space-around">
+            {/* If the question has a suplementary image or video, display it */}
+            <Grid container direction='row' justify='space-around'>
               {results.questions[results.position].url.type === 'image'
-                ? <img className={classes.image} src={results.questions[results.position].url.data} alt="Question Image" />
+                ? <img className={classes.image} src={results.questions[results.position].url.data} alt='Question Image' />
                 : <ReactPlayer
                     url={results.questions[results.position].url.data}
                   />
@@ -185,7 +201,8 @@ function Run () {
             Current players:
           </Typography>
           <br />
-          <Grid container direction="row" justify="space-around">
+          {/* show a list of current players */}
+          <Grid container direction='row' justify='space-around'>
               {'players' in results && results.players.map(i => (
                 <Chip color='secondary' key={i} label={i} />
               ))}
@@ -199,10 +216,12 @@ function Run () {
             onClick={() => {
               setModalOpen(true)
               stopQuiz(id)
+              // Stop the quiz and open the view results modal
             }}
           >
             Stop Quiz
           </Button>
+          {/* When the question timer has completed, allow the admin to advance the quiz, otherwise, disable the button */}
           {'position' in results && results.position + 1 < results.questions.length && (results.position === -1 || results.answerAvailable === true)
             ? <Button
               variant='contained'
@@ -220,6 +239,7 @@ function Run () {
             >
               Advance Quiz
             </Button>}
+            {/* Allow returning to the dashboard without stopping the quiz */}
             <Button
               variant='contained'
               color='primary'
@@ -234,12 +254,13 @@ function Run () {
         onClose={handleClose}
       >
         <div className={classes.paper}>
-          <Grid container direction="row" justify="center" alignItems="center" >
+          <Grid container direction='row' justify='center' alignItems='center' >
             <Typography alight='center' variant='h5'>Session {sessionId} Ended</Typography>
           </Grid>
-          <Grid container direction="row" justify="center" alignItems="center" >
-            <Typography variant='body1'>View results? </Typography>
-            <IconButton name='results' color="primary" component={Link} to={`/results/${sessionId}`} >
+          <Grid container direction='row' justify='center' alignItems='center' >
+            <Typography data-test-target='view' variant='body1'>View results?</Typography>
+            <IconButton name='results' color='primary' component={Link} to={`/results/${sessionId}`} >
+              {/* Link to the results page */}
               <ExitToAppIcon/>
             </IconButton>
           </Grid>

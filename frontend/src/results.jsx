@@ -132,7 +132,7 @@ function Results () {
       })
   }, [])
 
-  const initialRender = useRef(true);
+  const initialRender = useRef(true)
   useEffect(() => {
     if (initialRender.current) {
       initialRender.current = false
@@ -157,9 +157,10 @@ function Results () {
       <br />
       <Card>
         <CardContent>
-          <Typography variant='h3'>Results For Session {id}</Typography>
+          <Typography data-test-target='results' variant='h3'>Results</Typography>
+          <Typography variant='body1'>Session {id}</Typography>
           <br/>
-          <Grid container direction="row" justify="space-around" alignItems="center" >
+          <Grid container direction='row' justify='space-around' alignItems='center' >
             <Grid item>
               <BarChart
                 width={500}
@@ -172,12 +173,12 @@ function Results () {
                   bottom: 5,
                 }}
               >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="question" />
+                <CartesianGrid strokeDasharray='3 3' />
+                <XAxis dataKey='question' />
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                <Bar dataKey="% Correct" fill="#3D4EAE" />
+                <Bar dataKey='% Correct' fill='#3D4EAE' />
               </BarChart>
             </Grid>
             <Grid item>
@@ -193,12 +194,12 @@ function Results () {
                   bottom: 5,
                 }}
               >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="question" />
+                <CartesianGrid strokeDasharray='3 3' />
+                <XAxis dataKey='question' />
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                <Bar dataKey='Average Time (s)' fill="#F50057" />
+                <Bar dataKey='Average Time (s)' fill='#F50057' />
               </BarChart>
             </Grid>
             <Grid item>

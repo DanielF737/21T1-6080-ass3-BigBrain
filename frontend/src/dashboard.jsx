@@ -40,7 +40,7 @@ const useStyles = makeStyles((theme) => ({
     left: '50%',
     transform: 'translate(-50%, -50%)'
   }
-}));
+}))
 
 /**
  * Makes the API call to create a new quiz from the currently signed in user
@@ -162,7 +162,7 @@ async function startQuiz (id) {
  */
 function Quizzes () {
   const context = React.useContext(QuizContext)
-  const classes = useStyles();
+  const classes = useStyles()
   const [quizzes, setQuizzes] = context.quizzes
   const [quizCount, setQuizCount] = context.quizCount
   const [modalOpen, setModalOpen] = context.modalOpen
@@ -182,7 +182,7 @@ function Quizzes () {
     }
   }, [quizCount])
 
-  const initialRender = useRef(true);
+  const initialRender = useRef(true)
 
   useEffect(() => {
     if (initialRender.current) {
@@ -270,12 +270,12 @@ function Quizzes () {
         onClose={handleClose}
       >
         <div className={classes.paper}>
-          <Grid container direction="row" justify="center" alignItems="center" >
+          <Grid container direction='row' justify='center' alignItems='center' >
             <Typography alight='center' variant='h5'>Session ID: {modalBody}</Typography>
           </Grid>
-          <Grid container direction="row" justify="center" alignItems="center" >
-            <Typography variant='body1'>Copy session link: </Typography>
-            <IconButton color="primary" name='copy' component="button" onClick={() => {
+          <Grid container direction='row' justify='center' alignItems='center' >
+            <Typography data-test-target='link' variant='body1'>Copy session link:</Typography>
+            <IconButton color='primary' name='copy' component='button' onClick={() => {
               navigator.clipboard.writeText(`${window.location.href}play/${modalBody}`)
               handleClose()
             }}>
@@ -307,7 +307,7 @@ function Dashboard () {
       <br/>
       <Card>
         <CardContent>
-          <Typography variant='h3' gutterBottom>
+          <Typography data-test-target='DashboardText' variant='h3' gutterBottom>
             Dashboard
           </Typography>
           <Quizzes />

@@ -50,7 +50,7 @@ function App () {
   return (
     <div className='pp'>
       <AppBar position='static'>
-        <Grid container direction="row" justify={loggedIn ? 'space-between' : 'flex-start'} alignItems="center">
+        <Grid container direction='row' justify={loggedIn ? 'space-between' : 'flex-start'} alignItems='center'>
           <Button
             component={Link} to='/'
             color='inherit'
