@@ -8,7 +8,10 @@ export const quizQuestionPublicReturn = question => {
   let obj = {
     text: question.text,
     points: question.points,
-    time: question.time
+    time: question.time,
+    answers: question.answers,
+    id: question.id,
+    sols: question.solutions.length
   }
   if ('url' in question) {obj.url = question.url}
   return obj;
@@ -27,6 +30,10 @@ export const quizQuestionGetCorrectAnswers = question => {
  all of the answers, correct or incorrect.
 */
 export const quizQuestionGetAnswers = question => {
+  const a = []
+  for (let i = 0; i<question.answers.length; i++) {
+    a.push(question.answers[i].id)
+  }
   return question.answers
 };
 
