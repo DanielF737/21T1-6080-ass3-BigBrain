@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 
 export const QuizContext = React.createContext(null)
 
+// Provider for the quizzes
 export default function QuizProvider ({ children }) {
   const [quizzes, setQuizzes] = React.useState([])
   const [quizCount, setQuizCount] = React.useState(0)

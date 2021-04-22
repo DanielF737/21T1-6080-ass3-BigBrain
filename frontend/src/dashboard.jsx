@@ -19,6 +19,7 @@ const data = require('./config.json')
 const port = data.BACKEND_PORT
 const api = `http://localhost:${port}/`
 
+// custom styles
 const useStyles = makeStyles((theme) => ({
   paper: {
     position: 'absolute',
@@ -96,6 +97,7 @@ async function getQuizzes () {
   let r = await fetch(`${api}admin/quiz`, options)
   const ret = await r.json()
   const quizzes = []
+  // For each quiz, make the further api call to get better information
   for (let i = 0; i < ret.quizzes.length; i++) {
     r = await fetch(`${api}admin/quiz/${ret.quizzes[i].id}`, options)
     const out = await r.json()
@@ -165,16 +167,18 @@ async function startQuiz (id) {
 function Quizzes () {
   const context = React.useContext(QuizContext)
   const classes = useStyles()
-  const [quizzes, setQuizzes] = context.quizzes
-  const [quizCount, setQuizCount] = context.quizCount
-  const [modalOpen, setModalOpen] = context.modalOpen
-  const [modalBody, setModalBody] = context.modalBody
-  const [startId, setStartId] = context.startId
+  const [quizzes, setQuizzes] = context.quizzes // Stores all quizzes
+  const [quizCount, setQuizCount] = context.quizCount // Stores the number of quizzes
+  const [modalOpen, setModalOpen] = context.modalOpen // Stores the modal state
+  const [modalBody, setModalBody] = context.modalBody // Stores the contents of the body of the modal
+  const [startId, setStartId] = context.startId // Stores the id of the quiz we are starting
 
+  // Handles closing the modal
   const handleClose = () => {
     setModalOpen(false)
   }
 
+  // Gets the quizzes
   useEffect(() => {
     if (localStorage.getItem('token')) {
       getQuizzes()
@@ -185,13 +189,14 @@ function Quizzes () {
   }, [quizCount])
 
   const initialRender = useRef(true)
-
   useEffect(() => {
+    // Prevents running on page load
     if (initialRender.current) {
       initialRender.current = false
     } else if (startId === -1) {
       // pass
     } else {
+      // Starts the slected quiz
       startQuiz(startId)
         .then(r => {
           setModalBody(r)
@@ -202,12 +207,15 @@ function Quizzes () {
 
   return (
     <>
+      {/* Map each of the quizzes to a card */}
       {quizzes.map(i => (
         <div key={i.id}>
           <Card>
             <CardContent>
               <Grid container direction='row' alignItems='center'>
+                {/* Quiz name and thunbail */}
                 <Avatar
+                  aria-text= 'quiz thumbnail'
                   variant='rounded'
                   display='inline'
                   alt='Quiz Thumbnail'
@@ -217,11 +225,13 @@ function Quizzes () {
                   {i.name}
                 </Typography>
               </Grid>
+              {/* Show quiz info (time and length) */}
               <Typography variant='body1'>
                 Questions: {i.questions.length} | Time: {quizTime(i.questions)}s
               </Typography>
             </CardContent>
             <CardActions>
+              {/* Control buttons to edit the quiz or delete it */}
             <Button
               variant='contained'
               color='primary'
@@ -239,6 +249,7 @@ function Quizzes () {
             >
               Delete
             </Button>
+            {/* Depending on whether a session for the quiz is currently active, display the button to either start the quiz or run it */}
             {i.active === null
               ? <Button
                 variant='contained'
@@ -277,7 +288,7 @@ function Quizzes () {
           </Grid>
           <Grid container direction='row' justify='center' alignItems='center' >
             <Typography data-test-target='link' variant='body1'>Copy session link:</Typography>
-            <IconButton color='primary' name='copy' component='button' onClick={() => {
+            <IconButton aria-text='Copy game link and close modal' color='primary' name='copy' component='button' onClick={() => {
               navigator.clipboard.writeText(`${window.location.href}play/${modalBody}`)
               handleClose()
             }}>
@@ -315,6 +326,7 @@ function Dashboard () {
           <Quizzes />
         </CardContent>
         <CardActions>
+          {/* Button to add a new quiz card */}
           <Button
             variant='contained'
             color='primary'

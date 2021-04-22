@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 
 export const EditQuizContext = React.createContext(null)
 
+// Provider for the edit quiz screen
 export default function EditQuizProvider ({ children }) {
   const [quiz, setQuiz] = React.useState({})
   const [questionCount, setQuestionCount] = React.useState(0)

@@ -201,10 +201,12 @@ function Quiz () {
   const [questionCount, setQuestionCount] = context.questionCount // Stores the current question
   return (
     <>
+      {/* For each question, display a card */}
       {'questions' in quiz && quiz.questions.map(i => (
        <div key={i.id}>
         <Card >
           <CardContent>
+            {/* Show info such as question text, type (single/multiple choice), and addtional resource if avalaible (video or image) */}
             <Typography variant='h5'>
               {i.id}. {i.text}
             </Typography>
@@ -218,6 +220,7 @@ function Quiz () {
             }
           </CardContent>
           <CardActions>
+            {/* Button to edit the selected question */}
           <Button
             variant='contained'
             color='primary'
@@ -225,6 +228,7 @@ function Quiz () {
           >
             Edit
           </Button>
+          {/* Button to delete the selected question */}
           <Button
             variant='contained'
             color='primary'
@@ -258,10 +262,11 @@ function EditQuiz () {
   const history = useHistory()
   const classes = useStyles()
   const context = React.useContext(EditQuizContext)
-  const [quiz, setQuiz] = context.quiz
-  const [questionCount, setQuestionCount] = context.questionCount
-  const [updated, setUpdated] = React.useState('')
+  const [quiz, setQuiz] = context.quiz // stores the current quiz
+  const [questionCount, setQuestionCount] = context.questionCount // stores the number of questions
+  const [updated, setUpdated] = React.useState('') // stores changes to the quiz name
 
+  // Re-render whenever the number of questions changes
   const { id } = useParams()
   useEffect(() => {
     getQuiz(id)
@@ -274,6 +279,7 @@ function EditQuiz () {
       })
   }, [questionCount])
 
+  // redirect to home if no auth token
   if (!localStorage.getItem('token')) {
     history.push('/login')
   }
@@ -284,12 +290,15 @@ function EditQuiz () {
         <CardContent>
           <br/>
           <Grid container direction='row' alignItems='center'>
+            {/* Show the quiz thumbnail */}
             <Avatar
+              aria-text= 'Quiz thumbnail'
               variant='rounded'
               display='inline'
               alt='Quiz Thumbnail'
               src={quiz.thumbnail}
             />
+            {/* Display and allow changing of the quiz name */}
             {'name' in quiz && <TextField
               defaultValue={quiz.name}
               InputProps={{
@@ -310,6 +319,7 @@ function EditQuiz () {
           <Quiz/>
         </CardContent>
         <CardActions>
+          {/* Buttons to update the thumbnail, add a new queston, and return to the menu */}
           <Button
             variant='contained'
             color='primary'
@@ -321,7 +331,6 @@ function EditQuiz () {
               accept='image/png'
               hidden
               onChange={(e) => {
-                // TODO maybe use a useEffect hook?
                 updateThumb(quiz, id, e.target.files[0])
                 setQuestionCount(questionCount - 1)
               }}

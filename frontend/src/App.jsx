@@ -34,12 +34,17 @@ function signOut () {
   }
 }
 
+/**
+ * Sites app component, handles routing and navbar
+ * @returns component
+ */
 function App () {
   const history = useHistory()
   const context = React.useContext(AppContext)
   const [loggedIn, setLoggedIn] = context.loggedIn
   document.title = 'Big Brain'
 
+  // Checks whether user is loged in (for context sensitive appbar)
   useEffect(() => {
     setLoggedIn(localStorage.getItem('token'))
   }, [])
@@ -49,8 +54,10 @@ function App () {
 
   return (
     <div className='pp'>
+      {/* App navbar */}
       <AppBar position='static'>
         <Grid container direction='row' justify={loggedIn ? 'space-between' : 'flex-start'} alignItems='center'>
+          {/* Always show title and logo that doubles as a home buttons */}
           <Button
             component={Link} to='/'
             color='inherit'
@@ -59,6 +66,7 @@ function App () {
             <Avatar alt='Site Logo' src='https://icons.iconarchive.com/icons/google/noto-emoji-people-clothing-objects/128/12130-brain-icon.png' />
             Big Brain
           </Button>
+          {/* If the user is gined in, show the sign out button */}
           {loggedIn &&
             <Button
               color='inherit'
@@ -76,6 +84,7 @@ function App () {
       </AppBar>
       <Container maxWidth='lg'>
         <Switch>
+          {/* Manage routes */}
           <Route exact path ='/'>
             <QuizProvider>
               <Dashboard />

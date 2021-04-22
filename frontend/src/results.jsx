@@ -19,6 +19,11 @@ const data = require('./config.json')
 const port = data.BACKEND_PORT
 const api = `http://localhost:${port}/`
 
+/**
+ * Makes the api call to get the results from the specified session
+ * @param {*} id sessionId to get the results of
+ * @returns results object
+ */
 async function getResults (id) {
   const options = {
     method: 'GET',
@@ -33,20 +38,29 @@ async function getResults (id) {
   return (ret)
 }
 
+/**
+ * Calculates the top 5 players
+ * @param {} results results object
+ * @returns top 5 players and their score (percentage questions correct)
+ */
 function getTopPlayers (results) {
   const ranking = []
+  // Add all players to an array in order of the percentage of questions they got correct (descending)
   for (let i = 0; i < results.length; i++) {
     let total = 0
     let count = 0
+    // Calculate score
     for (let j = 0; j < results[i].answers.length; j++) {
       if (results[i].answers[j].correct) { total++ }
       count++
     }
+    // Create info object
     const obj = {
       name: results[i].name,
       score: total / count
     }
 
+    // Insert in order
     let inserted = false
     let k = 0
     while (inserted === false) {
@@ -61,14 +75,22 @@ function getTopPlayers (results) {
       k++
     }
   }
+  // Trim array to the first 5 and return
   ranking.splice(5, ranking.length)
   return (ranking)
 }
 
+/**
+ * Calculates the percentage of players who got each question correct
+ * @param {} results results object
+ * @returns array containing the percentage of players who got each questsion correct
+ */
 function getCorrectness (results) {
   const correctness = []
+  // If there is no questions, exit
   if (results.length === 0) { return correctness }
 
+  // for each question, loop through every player and see if they got it correct
   for (let i = 0; i < results[0].answers.length; i++) {
     let total = 0
     let count = 0
@@ -82,35 +104,45 @@ function getCorrectness (results) {
     }
     correctness.push(obj)
   }
-  console.log(correctness)
   return (correctness)
 }
 
+/**
+ * Calculates the average time taken to answer each question
+ * @param {} results results object
+ * @returns array containing the average time taken to answer each question
+ */
 function getAverageTime (results) {
   const time = []
+  // If there is no questions, exit
   if (results.length === 0) { return time }
 
+  // for each question, loop through every player and see calculate how long it took to answer
   for (let i = 0; i < results[0].answers.length; i++) {
     let total = 0
     let count = 0
     for (let j = 0; j < results.length; j++) {
       if (results[j].answers[i].answeredAt !== null) {
         total += Number(calculateTime(results[j].answers[i].questionStartedAt, results[j].answers[i].answeredAt))
-        console.log(total)
         count++
       }
     }
-    console.log()
+    // For each question, create the average time taken to answer in seconds (to 2 decimal places)
     const obj = {
       question: `Question ${i + 1}`,
       'Average Time (s)': (total / count).toFixed(2)
     }
     time.push(obj)
   }
-  console.log(time)
   return (time)
 }
 
+/**
+ * Calculates how long it took a player to answer a question
+ * @param {*} started The time the question started
+ * @param {*} answered The time the players last answer was recorded
+ * @returns Time taken to answer (seconds)
+ */
 function calculateTime (started, answered) {
   const start = new Date(started)
   const ans = new Date(answered)
@@ -119,6 +151,10 @@ function calculateTime (started, answered) {
   return difference
 }
 
+/**
+ * Results component
+ * @returns component
+ */
 function Results () {
   const history = useHistory()
   const { id } = useParams()
@@ -149,19 +185,15 @@ function Results () {
     history.push('/login')
   }
 
-  console.log(results)
-  console.log(topPlayers)
-  console.log(correctness)
-  console.log(time)
-
   return (
     <>
       <br />
       <Card>
         <CardContent>
           <Typography data-test-target='results' variant='h3'>Results</Typography>
-          <Typography variant='body1'>Session {id}</Typography>
+          <Typography variant='body1'>Session {id}</Typography> {/* Show the session ID */}
           <br/>
+          {/* Graph the correctness per question */}
           <Grid container direction='row' justify='space-around' alignItems='center' >
             <Grid item>
               <BarChart
@@ -183,6 +215,7 @@ function Results () {
                 <Bar dataKey='% Correct' fill='#3D4EAE' />
               </BarChart>
             </Grid>
+            {/* Graph the average time taken per question */}
             <Grid item>
               average answer time
               <BarChart
@@ -205,6 +238,7 @@ function Results () {
               </BarChart>
             </Grid>
             <Grid item>
+              {/* Built a tabel showing the ranking of the top 5 players and their scores */}
               <TableContainer component={CardContent}>
                 <Table>
                   <TableHead>
@@ -229,6 +263,7 @@ function Results () {
           </Grid>
         </CardContent>
         <CardActions>
+          {/* Button to return to site home */}
           <Button
             variant='contained'
             color='primary'

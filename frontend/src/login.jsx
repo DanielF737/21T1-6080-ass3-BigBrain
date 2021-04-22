@@ -37,7 +37,7 @@ const useStyles = makeStyles((theme) => ({
  * @returns {String}
  */
 async function login (email, password) {
-  // const history = useHistory()
+  // reutrn errors if missing info
   if (email === '') { return ('Email is blank') }
   if (password === '') { return ('Password is blank') }
 
@@ -56,7 +56,6 @@ async function login (email, password) {
 
   const r = await fetch(`${api}admin/auth/login`, options)
   const ret = await r.json()
-  console.log(ret)
 
   // If the API Call returns an error, return the error message
   if ('error' in ret) {
@@ -64,21 +63,27 @@ async function login (email, password) {
   }
 
   localStorage.setItem('token', ret.token)
-  // history.push('/')
   return ('')
 }
 
-const Login = (props) => {
+/**
+ * The login form component
+ * @returns component
+ */
+function Login () {
   const history = useHistory()
   const context = React.useContext(AppContext)
-  const [loggedIn, setLoggedIn] = context.loggedIn
+  const [loggedIn, setLoggedIn] = context.loggedIn // store whether we are logged in
   if (localStorage.getItem('token')) {
     history.push('/')
   }
-  console.log(loggedIn)
+  console.log(loggedIn) // Keep the linter happy
   const classes = useStyles()
+  // State hooks to store the value of text fields
   const [email, setEmail] = React.useState('')
   const [pWord, setPWord] = React.useState('')
+
+  // Stores the error message
   const [error, setError] = React.useState('')
 
   return (
@@ -89,7 +94,9 @@ const Login = (props) => {
         </Typography>
         <form className={classes.form} noValidate>
           <br />
+          {/* If there is an error show it */}
           {error.length > 0 ? <Alert variant='filled' severity='error'>{error}</Alert> : <></>}
+          {/* All of the text fields and their setters */}
           <TextField
             variant='outlined'
             margin='normal'
@@ -122,6 +129,7 @@ const Login = (props) => {
             className={classes.submit}
             onClick = {(e) => {
               e.preventDefault()
+              // Make the api call, show error if it fails or redirect if it succeeds
               login(email, pWord)
                 .then(r => {
                   setError(r)
@@ -136,6 +144,7 @@ const Login = (props) => {
           </Button>
           <Grid container>
             <Grid item>
+              {/* Link to switch to registration form */}
               <Link name='register' href='/register' variant='body2'>
                 {'Don\'t have an account? Sign Up'}
               </Link>

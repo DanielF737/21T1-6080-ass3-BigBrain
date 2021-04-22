@@ -15,6 +15,7 @@ const data = require('./config.json')
 const port = data.BACKEND_PORT
 const api = `http://localhost:${port}/`
 
+// Custom styles
 const useStyles = makeStyles((theme) => ({
   paper: {
     marginTop: theme.spacing(8),
@@ -30,10 +31,21 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 
+/**
+ * Handles the api call to register a user
+ * @param {*} name provided name
+ * @param {*} email  provided email
+ * @param {*} password  provided password
+ * @param {*} confirm password confirmation field
+ * @returns error message
+ */
 async function register (name, email, password, confirm) {
+  // Ensure fields arent blank, return error if they are
   if (name === '') { return ('Name is blank') }
   if (email === '') { return ('Email is blank') }
   if (password === '') { return ('Password is blank') }
+
+  // Ensure password and confirm fields match
   if (password !== confirm) { return ('Passwords do not match') }
 
   const data = {
@@ -52,7 +64,6 @@ async function register (name, email, password, confirm) {
 
   const r = await fetch(`${api}admin/auth/register`, options)
   const ret = await r.json()
-  console.log(ret)
 
   // If the API Call returns an error, return the error message
   if ('error' in ret) {
@@ -60,25 +71,33 @@ async function register (name, email, password, confirm) {
   }
 
   localStorage.setItem('token', ret.token)
-  // history.push('/')
   return ('')
 }
 
-const Register = (props) => {
+/**
+ * The registration form component
+ * @returns component
+ */
+function Register () {
   const history = useHistory()
+  // If the user is logged in, redirect to the dashboard
   if (localStorage.getItem('token')) {
     history.push('/')
   }
   const context = React.useContext(AppContext)
-  const [loggedIn, setLoggedIn] = context.loggedIn
+  const [loggedIn, setLoggedIn] = context.loggedIn // store whether we are logged in
 
-  console.log(loggedIn)
+  console.log(loggedIn) // Keep the linter happy
 
   const classes = useStyles()
+
+  // State hooks to store the value of text fields
   const [name, setName] = React.useState('')
   const [email, setEmail] = React.useState('')
   const [pWord, setPWord] = React.useState('')
   const [confirm, setConfirm] = React.useState('')
+
+  // Stores the error message
   const [error, setError] = React.useState('')
 
   return (
@@ -89,7 +108,9 @@ const Register = (props) => {
         </Typography>
         <form className={classes.form} noValidate>
           <br />
+          {/* If there is an error show it */}
           {error.length > 0 ? <Alert variant='filled' severity='error'>{error}</Alert> : <></>}
+          {/* All of the text fields and their setters */}
           <TextField
             variant='outlined'
             margin='normal'
@@ -145,6 +166,7 @@ const Register = (props) => {
             className={classes.submit}
             onClick = {(e) => {
               e.preventDefault()
+              // Make the api call, show error if it fails or redirect if it succeeds
               register(name, email, pWord, confirm)
                 .then(r => {
                   setError(r)
@@ -159,6 +181,7 @@ const Register = (props) => {
           </Button>
           <Grid container>
             <Grid item>
+              {/* Link to switch to login form */}
               <Link name='login' href='/login' variant='body2'>
                 {'Have an account? Sign In'}
               </Link>
