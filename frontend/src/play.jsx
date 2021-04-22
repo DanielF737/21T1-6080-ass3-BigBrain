@@ -59,7 +59,7 @@ async function joinGame (id, uname) {
 
   const r = await fetch(`${api}play/join/${id}`, options)
   const ret = await r.json()
-  localStorage.setItem('playerId', ret.playerId)
+  sessionStorage.setItem('playerId', ret.playerId)
 }
 
 async function checkStarted (playerId) {
@@ -164,15 +164,15 @@ function Game ({ id }) {
     let playing
     if (started === true) {
       playing = window.setInterval(() => {
-        checkQuestion(localStorage.getItem('playerId'))
+        checkQuestion(sessionStorage.getItem('playerId'))
           .then(r => {
             // Was having massive issues reading id from state so instead i did local storage. Its not perfect but it works
-            if (typeof r !== 'undefined' && r.id !== Number(localStorage.getItem('qId'))) {
+            if (typeof r !== 'undefined' && r.id !== Number(sessionStorage.getItem('qId'))) {
               console.log('here2')
               setQuestion(r)
               setSols([])
               setSelected([])
-              localStorage.setItem('val', -1)
+              sessionStorage.setItem('val', -1)
             }
 
             if (typeof r !== 'undefined') {
@@ -180,13 +180,13 @@ function Game ({ id }) {
               const current = new Date()
               const difference = (Number((Number(r.time)) - ((current.getTime() / 1000) - (qTime.getTime() / 1000))).toFixed(0))
               setRemaining(difference)
-              localStorage.setItem('qId', r.id)
+              sessionStorage.setItem('qId', r.id)
             }
           })
       }, 1000)
     }
     const starting = window.setInterval(() => {
-      checkStarted(localStorage.getItem('playerId'))
+      checkStarted(sessionStorage.getItem('playerId'))
         .then(r => {
           if (r.started === true) {
             setStarted(true)
@@ -205,11 +205,11 @@ function Game ({ id }) {
         clearInterval(starting)
         clearInterval(playing)
         console.log('game ended')
-        checkResults(localStorage.getItem('playerId'))
+        checkResults(sessionStorage.getItem('playerId'))
           .then(r => {
             setResults(r)
-            localStorage.removeItem('playerId')
-            localStorage.removeItem('qId')
+            sessionStorage.removeItem('playerId')
+            sessionStorage.removeItem('qId')
           })
       }
     }
@@ -227,7 +227,7 @@ function Game ({ id }) {
       initialRenderA.current = false
     } else {
       if (remaining < 0) {
-        checkAnswers(localStorage.getItem('playerId'))
+        checkAnswers(sessionStorage.getItem('playerId'))
           .then(r => {
             setSols(r)
           })
@@ -242,7 +242,7 @@ function Game ({ id }) {
     if (initialRenderB.current) {
       initialRenderB.current = false
     } else {
-      sendAnswer(localStorage.getItem('playerId'), selected)
+      sendAnswer(sessionStorage.getItem('playerId'), selected)
     }
   }, [JSON.stringify(selected)])
 
@@ -294,9 +294,9 @@ function Game ({ id }) {
                     </FormControl>
                     </>
                     : <>
-                      <RadioGroup value={Number(localStorage.getItem('val'))} onChange={(e) => {
+                      <RadioGroup value={Number(sessionStorage.getItem('val'))} onChange={(e) => {
                         console.log(Number(e.target.value))
-                        localStorage.setItem('val', e.target.value)
+                        sessionStorage.setItem('val', e.target.value)
                         setSelected([Number(e.target.value)])
                       }}>
                         {'answers' in question && question.answers.map(i => (
@@ -305,7 +305,7 @@ function Game ({ id }) {
                               ? <FormControlLabel value={i.id} label={i.text} control={<Radio/>}/>
                               : <FormControlLabel disabled className={sols.includes(i.id)
                                 ? classes.correct
-                                : i.id === Number(localStorage.getItem('val')) ? classes.incorrect : ''
+                                : i.id === Number(sessionStorage.getItem('val')) ? classes.incorrect : ''
                               } key={i.id} value={i.id} label={i.text} control={<Radio/>}/>
                             }
                           </div>
@@ -360,7 +360,7 @@ function Play () {
 
   useEffect(() => {
     setSessionId(sesId)
-    if (localStorage.getItem('playerId')) {
+    if (sessionStorage.getItem('playerId')) {
       setPlaying(true)
     } else { setPlaying(false) }
   }, [])
@@ -406,8 +406,8 @@ function Play () {
               color='primary'
               variant='contained'
               onClick={() => {
-                localStorage.removeItem('playerId')
-                localStorage.removeItem('qId')
+                sessionStorage.removeItem('playerId')
+                sessionStorage.removeItem('qId')
                 setPlaying(false)
               }}
             >
