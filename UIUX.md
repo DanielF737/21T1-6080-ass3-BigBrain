@@ -1,0 +1,4 @@
+- Aria labels on all components that need them (graphic button, etc)
+- alt text on images
+- high contrast color scheme to enhance visiblitly
+- intuitive site flow

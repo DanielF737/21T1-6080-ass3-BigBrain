@@ -14,8 +14,10 @@ import FileCopyIcon from '@material-ui/icons/FileCopy'
 import { makeStyles } from '@material-ui/core/styles'
 
 import { QuizContext } from './util/quiz'
-// TODO fix this to use config file across all files
-const api = 'http://localhost:5005/'
+
+const data = require('./config.json')
+const port = data.BACKEND_PORT
+const api = `http://localhost:${port}/`
 
 const useStyles = makeStyles((theme) => ({
   paper: {

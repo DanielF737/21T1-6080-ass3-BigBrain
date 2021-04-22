@@ -17,8 +17,11 @@ import TableRow from '@material-ui/core/TableRow'
 import { makeStyles } from '@material-ui/core/styles'
 
 import { CardActions } from '@material-ui/core'
-const api = 'http://localhost:5005/'
+const data = require('./config.json')
+const port = data.BACKEND_PORT
+const api = `http://localhost:${port}/`
 
+// Custom styles
 const useStyles = makeStyles((theme) => ({
   title: {
     fontSize: 35,
@@ -61,28 +64,26 @@ function fileToDataUrl (file) {
  */
 async function updateQuestion (quiz, id, index, text, time, points, url) {
   const questions = quiz.questions
+  // Checks if each of the URL parameters are present, then sets the accordingly
   if (text) { questions[index - 1].text = text.trim() }
   if (time) { questions[index - 1].time = time.trim() }
   if (points) { questions[index - 1].points = points.trim() }
-  console.log(url)
+  // Check if url is present, then checks the type and sets accordingly
   if (url && 'type' in url) {
-    console.log('hereee')
     if ('type' in url && url.type === 'url') {
-      console.log('hereee1')
       questions[index - 1].url = {
         type: url.type,
         data: url.data.trim()
       }
     } else {
-      console.log('hereee2')
       questions[index - 1].url = url
-      console.log(url)
-      console.log(questions[index - 1].url)
     }
   } else {
+    // If no url object was provided remove it from the question object
     delete questions[index - 1].url
   }
 
+  // Make the api call
   const data = {
     questions: questions
   }
@@ -95,8 +96,6 @@ async function updateQuestion (quiz, id, index, text, time, points, url) {
     },
     body: JSON.stringify(data)
   }
-
-  console.log(questions[index - 1])
 
   await fetch(`${api}admin/quiz/${id}`, options)
 }
@@ -115,7 +114,9 @@ async function updateAnswer (quiz, id, index, answerIndex, text, correct) {
   const answers = quiz.questions[index].answers
   const solutions = quiz.questions[index].solutions
 
+  // Sets the new text of the answer
   answers[answerIndex].text = text
+  // Stores the answer ID in the solutions array if it is correct, removes it from the array if it has been changed to incorrect
   if (correct === true) {
     if (!solutions.includes(answerIndex)) {
       solutions.push(answerIndex)
@@ -127,6 +128,7 @@ async function updateAnswer (quiz, id, index, answerIndex, text, correct) {
     }
   }
 
+  // Save the updated answers and solutions and make the api call
   questions[index].answers = answers
   questions[index].solutions = solutions
 
@@ -155,12 +157,13 @@ async function updateAnswer (quiz, id, index, answerIndex, text, correct) {
 async function addAnswer (quiz, id, index) {
   const questions = quiz.questions
   const answers = quiz.questions[index].answers
-  console.log(answers)
 
+  // Exit out of the function if we are at the maximum number of answers
   if (answers.length >= 6) {
     return
   }
 
+  // Create a new answer object, append it to the question object and make the api call
   const newAnswer = {
     id: answers.length,
     text: 'New answer'
@@ -197,6 +200,7 @@ async function removeAnswer (quiz, id, index, answerId) {
   const answers = quiz.questions[index].answers
   const solutions = quiz.questions[index].solutions
 
+  // Exit if this means going below the minimum number of answers
   if (answers.length <= 2) {
     return
   }
@@ -252,25 +256,27 @@ async function getQuiz (id) {
 function EditQuestion () {
   const history = useHistory()
   const classes = useStyles()
-  const { quizId, questionId } = useParams()
+  const { quizId, questionId } = useParams() // Gets the quiz and question Ids from the url params
 
-  const [quiz, setQuiz] = React.useState({})
-  const [question, setQuestion] = React.useState({})
-  const [answerCount, setAnswerCount] = React.useState(0)
+  const [quiz, setQuiz] = React.useState({}) // The current quiz
+  const [question, setQuestion] = React.useState({}) // The current question
+  const [answerCount, setAnswerCount] = React.useState(0) // The count of answers (actually just a cheeky state variable we can use to update ui components)
 
-  const [text, setText] = React.useState('')
-  const [time, setTime] = React.useState('')
-  const [points, setPoints] = React.useState('')
-  const [url, setUrl] = React.useState({})
-  const [value, setValue] = React.useState('')
-  const [selectedFile, setSelectedFile] = React.useState('')
+  const [text, setText] = React.useState('') // Stores the text in the text textfield
+  const [time, setTime] = React.useState('') // Stores the text in the time textfield
+  const [points, setPoints] = React.useState('') //  Stores the text in the points textfield
+  const [url, setUrl] = React.useState({}) // Stores the text in the URL textfield
+  const [value, setValue] = React.useState('') // Stores the url to display on the question info page
+  const [selectedFile, setSelectedFile] = React.useState('') // stores the selected file from the text input
 
   const initialRender = useRef(true)
 
   useEffect(() => {
+    // Prevents from running on page load
     if (initialRender.current) {
       initialRender.current = false
     } else {
+      // Whenever a new file is loaded, convert it to a base64 image and send it to the backend
       fileToDataUrl(selectedFile)
         .then(r => {
           const image = r
@@ -286,12 +292,14 @@ function EditQuestion () {
   }, [selectedFile])
 
   const initialRenderB = useRef(true)
+  // Get the current quiz object to get the question we are editing
   useEffect(() => {
     getQuiz(quizId)
       .then(r => {
         setQuiz(r)
         setQuestion(r.questions[questionId - 1])
 
+        // Prevent this snippet from running on page load
         if (initialRenderB.current) {
           if (typeof r.questions[questionId - 1].url !== 'undefined') { setUrl(r.questions[questionId - 1].url) }
           initialRenderB.current = false
@@ -306,8 +314,7 @@ function EditQuestion () {
       })
   }, [answerCount])
 
-  // Keeping the linter happy while developing this module
-
+  // Return to home if not logged in
   if (!localStorage.getItem('token')) {
     history.push('/login')
   }
@@ -317,9 +324,11 @@ function EditQuestion () {
     <>
       <br/>
       <Grid container>
+        {/* Display the question id  */}
         <Typography variant='h3' gutterBottom>
           Question {questionId}.
         </Typography>
+        {/* Create a text field that displays the question text and allows the admin to change it */}
         {'text' in question && <TextField
           InputProps={{
             classes: {
@@ -331,11 +340,13 @@ function EditQuestion () {
             setText(e.target.value)
           }}
           onBlur={() => {
+            // Send changes to the backend on blur
             updateQuestion(quiz, quizId, questionId, text, time, points, url)
             setAnswerCount(answerCount + 1)
           }}
         />}
       </Grid>
+      {/* Display info about the question such as answer type and additional resource */}
       <Typography variant='body1'>
         Type: {'solutions' in question && question.solutions.length === 1 ? 'Single Answer' : 'Multiple Choice'}
       </Typography>
@@ -345,6 +356,7 @@ function EditQuestion () {
         </Typography>
       }
       <br />
+      {/* Text fields to display and change the question time and points */}
       {'text' in question &&
         <>
           <Card>
@@ -387,13 +399,13 @@ function EditQuestion () {
           <br />
         </>
       }
-      {/* TODO add way to delete URL, and upload image instead of url, make url object with a type field */}
+      {/* Allows the adding of a url to a video or uploading an image */}
       <Card>
         <CardContent>
           <Grid container direction='row'>
             {typeof url !== 'undefined' && 'type' in url && url.type === 'image'
-              ? <TextField disabled label='Image Uploaded'/>
-              : <TextField
+              ? <TextField disabled label='Image Uploaded'/> // If an image has been uploaded, disable the text field
+              : <TextField // If nothing has been uploaded or a video url has been added, display and allow changes
                 label='Update Question URL'
                 value={value}
                 onChange={(e) => {
@@ -404,6 +416,7 @@ function EditQuestion () {
                   })
                 }}
                 onBlur={() => {
+                  // Send changes to the backend
                   updateQuestion(quiz, quizId, questionId, text, time, points, url)
                   setAnswerCount(answerCount + 1)
                 }}
@@ -416,6 +429,7 @@ function EditQuestion () {
             variant='contained'
             color='primary'
             onClick={(e) => {
+              // Remove url object from question on backend, display change on frontend
               setUrl({})
               setValue('')
               updateQuestion(quiz, quizId, questionId, text, time, points, url)
@@ -430,22 +444,22 @@ function EditQuestion () {
             component='label'
           >
             Add Image
+            {/* Handles the uploading of an image */}
             <input
               type='file'
               value = ''
               accept='image/png'
               hidden
               onChange={(e) => { setSelectedFile(e.target.files[0]) }}
-                // handle image upload and conversion
-                // e.target.files[0]
             />
           </Button>
         </CardActions>
       </Card>
       <br />
 
-      {/* TODO refactor this into its own component, whole thing uses context */}
+      {/* Answer managment card */}
       <Card>
+        {/* Build the table of answers */}
         <TableContainer component={CardContent}>
           <Table>
             <TableHead>
@@ -456,7 +470,7 @@ function EditQuestion () {
               </TableRow>
             </TableHead>
             <TableBody>
-              {/* TODO add logic to update question text on blur and add/remove solution on switch */}
+              {/* map the answers to table rows */}
               {'answers' in question && question.answers.map(i => (
                 <TableRow key={i.id}>
                   <TableCell >
@@ -464,6 +478,7 @@ function EditQuestion () {
                       label='Answer Text'
                       defaultValue={i.text}
                       onBlur={(e) => {
+                        // Update the answers text on blur (whenever the textfield is unfocused)
                         updateAnswer(quiz, quizId, questionId - 1, i.id, e.target.value, question.solutions.includes(i.id))
                         setAnswerCount(answerCount + 1)
                       }}
@@ -473,17 +488,18 @@ function EditQuestion () {
                     <Checkbox
                       defaultChecked={question.solutions.includes(i.id)}
                       onChange={(e) => {
+                        // Toggle whether the answer is a correct answer whenever the checkbox is checked or unchecked
                         updateAnswer(quiz, quizId, questionId - 1, i.id, i.text, e.target.checked)
                         setAnswerCount(answerCount - 1)
                       }}
                     />
                   </TableCell>
                   <TableCell >
-                    {/* TODO make sure deletes reflect correctly on page */}
                     <Button
                       variant='contained'
                       color='secondary'
                       onClick={(e) => {
+                        // Allows the removal of an answer
                         removeAnswer(quiz, quizId, questionId - 1, i.id)
                         setAnswerCount(answerCount - 1)
                       }}
@@ -501,6 +517,7 @@ function EditQuestion () {
             variant='contained'
             color='primary'
             onClick={() => {
+              // Append a new answer to the end of the questions answer list
               addAnswer(quiz, quizId, questionId - 1)
               setAnswerCount(answerCount + 1)
             }}
@@ -510,6 +527,7 @@ function EditQuestion () {
         </CardActions>
       </Card>
       <br />
+      {/* Navigates to the quiz managment page */}
       <Button
         variant='contained'
         color='primary'

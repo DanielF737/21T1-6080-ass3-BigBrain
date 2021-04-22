@@ -14,7 +14,9 @@ import { makeStyles } from '@material-ui/core/styles'
 import Grid from '@material-ui/core/Grid'
 import Chip from '@material-ui/core/Chip'
 
-const api = 'http://localhost:5005/'
+const data = require('./config.json')
+const port = data.BACKEND_PORT
+const api = `http://localhost:${port}/`
 
 // Custom styles
 const useStyles = makeStyles((theme) => ({
@@ -259,7 +261,7 @@ function Run () {
           </Grid>
           <Grid container direction='row' justify='center' alignItems='center' >
             <Typography data-test-target='view' variant='body1'>View results?</Typography>
-            <IconButton name='results' color='primary' component={Link} to={`/results/${sessionId}`} >
+            <IconButton aria-label="View Results" name='results' color='primary' component={Link} to={`/results/${sessionId}`} >
               {/* Link to the results page */}
               <ExitToAppIcon/>
             </IconButton>

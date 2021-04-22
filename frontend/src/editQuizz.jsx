@@ -12,8 +12,11 @@ import TextField from '@material-ui/core/TextField'
 import { makeStyles } from '@material-ui/core/styles'
 
 import { EditQuizContext } from './util/editQuiz'
-const api = 'http://localhost:5005/'
+const data = require('./config.json')
+const port = data.BACKEND_PORT
+const api = `http://localhost:${port}/`
 
+// Custom styles
 const useStyles = makeStyles((theme) => ({
   title: {
     fontSize: 40,
@@ -68,6 +71,7 @@ async function getQuiz (id) {
  * @param {*} id The ID of the quiz object
  */
 async function newQuestion (quiz, id) {
+  // Create an empty question object with placeholder values
   const newQ = {
     id: quiz.questions.length + 1,
     text: 'New Question',
@@ -86,16 +90,13 @@ async function newQuestion (quiz, id) {
     solutions: [0]
   }
 
+  // Append the question to the quiz object
   const questions = quiz.questions
-  console.log(questions)
   questions.push(newQ)
-  console.log(questions)
 
   const data = {
     questions: questions
   }
-
-  console.log(data)
 
   const options = {
     method: 'PUT',
@@ -118,8 +119,9 @@ async function newQuestion (quiz, id) {
 async function deleteQuestion (quiz, id, index) {
   const questions = quiz.questions
   questions.splice(index, 1)
-  console.log(questions)
   let count = 1
+
+  // Reorder question Ids
   for (let i = 0; i < questions.length; i++) {
     questions[i].id = count
     count++
@@ -127,8 +129,6 @@ async function deleteQuestion (quiz, id, index) {
   const data = {
     questions: questions
   }
-
-  console.log(data)
 
   const options = {
     method: 'PUT',
@@ -152,7 +152,6 @@ async function updateName (quiz, id, name) {
   const data = {
     name: name
   }
-  console.log(data)
 
   const options = {
     method: 'PUT',
@@ -166,7 +165,6 @@ async function updateName (quiz, id, name) {
   await fetch(`${api}admin/quiz/${id}`, options)
 }
 
-// TODO make this instant update
 /**
  * Updates the thumbnail of the quiz object
  * @param {*} quiz The quiz object the question is being removed from
@@ -174,12 +172,10 @@ async function updateName (quiz, id, name) {
  * @param {*} image the path to the image
  */
 async function updateThumb (quiz, id, image) {
-  const img = await fileToDataUrl(image)
-  console.log(img)
+  const img = await fileToDataUrl(image) // Convert the thumbnail to a data string
   const data = {
     thumbnail: img
   }
-  console.log(data)
 
   const options = {
     method: 'PUT',
@@ -199,10 +195,10 @@ async function updateThumb (quiz, id, image) {
  * @returns Editable quiz object
  */
 function Quiz () {
-  const { id } = useParams()
+  const { id } = useParams() // Get the id from the URL paramater
   const context = React.useContext(EditQuizContext)
-  const [quiz, setQuiz] = context.quiz
-  const [questionCount, setQuestionCount] = context.questionCount
+  const [quiz, setQuiz] = context.quiz // Stores the current quiz
+  const [questionCount, setQuestionCount] = context.questionCount // Stores the current question
   return (
     <>
       {'questions' in quiz && quiz.questions.map(i => (
@@ -234,7 +230,6 @@ function Quiz () {
             color='primary'
             onClick={() => {
               deleteQuestion(quiz, id, i.id - 1)
-              console.log(i.id)
               setQuestionCount(questionCount + 1)
             }}
           >
@@ -271,7 +266,6 @@ function EditQuiz () {
   useEffect(() => {
     getQuiz(id)
       .then(r => {
-        console.log(r)
         setQuiz(r)
 
         if ('error' in r) {

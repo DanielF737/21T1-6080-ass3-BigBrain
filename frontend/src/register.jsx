@@ -11,7 +11,9 @@ import Container from '@material-ui/core/Container'
 import Alert from '@material-ui/lab/Alert'
 
 import { AppContext } from './util/app'
-const api = 'http://localhost:5005/'
+const data = require('./config.json')
+const port = data.BACKEND_PORT
+const api = `http://localhost:${port}/`
 
 const useStyles = makeStyles((theme) => ({
   paper: {

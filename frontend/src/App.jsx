@@ -54,6 +54,7 @@ function App () {
           <Button
             component={Link} to='/'
             color='inherit'
+            aria-label="Menu Button"
           >
             <Avatar alt='Site Logo' src='https://icons.iconarchive.com/icons/google/noto-emoji-people-clothing-objects/128/12130-brain-icon.png' />
             Big Brain

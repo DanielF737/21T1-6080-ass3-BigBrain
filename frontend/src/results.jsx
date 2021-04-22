@@ -15,7 +15,9 @@ import CardActions from '@material-ui/core/CardActions'
 import Button from '@material-ui/core/Button'
 
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts'
-const api = 'http://localhost:5005/'
+const data = require('./config.json')
+const port = data.BACKEND_PORT
+const api = `http://localhost:${port}/`
 
 async function getResults (id) {
   const options = {

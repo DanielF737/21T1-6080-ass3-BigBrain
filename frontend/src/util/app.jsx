@@ -3,6 +3,7 @@ import PropTypes from 'prop-types'
 
 export const AppContext = React.createContext(null)
 
+// Provider for the loggedIn state
 export default function AppProvider ({ children }) {
   const [loggedIn, setLoggedIn] = React.useState(false)
 
