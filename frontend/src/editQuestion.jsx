@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { Link, useHistory, useParams } from 'react-router-dom'
 
 import Button from '@material-ui/core/Button'
@@ -16,7 +16,6 @@ import TableHead from '@material-ui/core/TableHead'
 import TableRow from '@material-ui/core/TableRow'
 import { makeStyles } from '@material-ui/core/styles'
 
-import { EditQuizContext } from './util/editQuiz'
 import { CardActions } from '@material-ui/core'
 const api = 'http://localhost:5005/'
 
@@ -27,6 +26,28 @@ const useStyles = makeStyles((theme) => ({
     marginLeft: 10
   },
 }))
+
+/**
+ * coverts image to base64 encoding
+ * @param {*} file path to file
+ * @returns dataURL for file
+ */
+function fileToDataUrl (file) {
+  const validFileTypes = ['image/jpeg', 'image/png', 'image/jpg']
+  const valid = validFileTypes.find(type => type === file.type);
+  // Bad data, let's walk away.
+  if (!valid) {
+    throw Error('provided file is not a png, jpg or jpeg image.');
+  }
+
+  const reader = new FileReader();
+  const dataUrlPromise = new Promise((resolve, reject) => {
+    reader.onerror = reject;
+    reader.onload = () => resolve(reader.result);
+  });
+  reader.readAsDataURL(file);
+  return dataUrlPromise;
+}
 
 /**
  * Multipurpose function for updating simple attributes of question object
@@ -43,7 +64,24 @@ async function updateQuestion (quiz, id, index, text, time, points, url) {
   if (text) { questions[index - 1].text = text.trim() }
   if (time) { questions[index - 1].time = time.trim() }
   if (points) { questions[index - 1].points = points.trim() }
-  if (url) { questions[index - 1].url = url.trim() }
+  console.log(url)
+  if (url && 'type' in url) {
+    console.log('hereee')
+    if ('type' in url && url.type === 'url') {
+      console.log('hereee1')
+      questions[index - 1].url = {
+        type: url.type,
+        data: url.data.trim()
+      }
+    } else {
+      console.log('hereee2')
+      questions[index - 1].url = url
+      console.log(url)
+      console.log(questions[index - 1].url)
+    }
+  } else {
+    delete questions[index - 1].url
+  }
 
   const data = {
     questions: questions
@@ -57,6 +95,8 @@ async function updateQuestion (quiz, id, index, text, time, points, url) {
     },
     body: JSON.stringify(data)
   }
+
+  console.log(questions[index - 1])
 
   await fetch(`${api}admin/quiz/${id}`, options)
 }
@@ -115,6 +155,7 @@ async function updateAnswer (quiz, id, index, answerIndex, text, correct) {
 async function addAnswer (quiz, id, index) {
   const questions = quiz.questions
   const answers = quiz.questions[index].answers
+  console.log(answers)
 
   if (answers.length >= 6) {
     return
@@ -145,7 +186,7 @@ async function addAnswer (quiz, id, index) {
 }
 
 /**
- * Adds a new answer to the question
+ * Removes an answer from the question
  * @param {*} quiz The quiz object the question is to be added to
  * @param {Number} id The ID of the quiz object
  * @param {Number} index The index of the question object in the quiz
@@ -213,20 +254,52 @@ function EditQuestion () {
   const classes = useStyles()
   const { quizId, questionId } = useParams()
 
-  const context = React.useContext(EditQuizContext)
-  const [quiz, setQuiz] = context.quiz
-  const [question, setQuestion] = context.question
-  const [answerCount, setAnswerCount] = context.answerCount
+  const [quiz, setQuiz] = React.useState({})
+  const [question, setQuestion] = React.useState({})
+  const [answerCount, setAnswerCount] = React.useState(0)
+
   const [text, setText] = React.useState('')
   const [time, setTime] = React.useState('')
   const [points, setPoints] = React.useState('')
-  const [url, setUrl] = React.useState('')
+  const [url, setUrl] = React.useState({})
+  const [value, setValue] = React.useState('')
+  const [selectedFile, setSelectedFile] = React.useState('')
 
+  const initialRender = useRef(true);
+
+  useEffect(() => {
+    if (initialRender.current) {
+      initialRender.current = false
+    } else {
+      fileToDataUrl(selectedFile)
+        .then(r => {
+          const image = r
+          setUrl({
+            type: 'image',
+            data: image
+          })
+          setValue('')
+          updateQuestion(quiz, quizId, questionId, text, time, points, url)
+          setAnswerCount(answerCount + 1)
+        })
+    }
+  }, [selectedFile])
+
+  const initialRenderB = useRef(true);
   useEffect(() => {
     getQuiz(quizId)
       .then(r => {
         setQuiz(r)
         setQuestion(r.questions[questionId - 1])
+
+        if (initialRenderB.current) {
+          if (typeof r.questions[questionId - 1].url !== 'undefined') { setUrl(r.questions[questionId - 1].url) }
+          initialRenderB.current = false
+        }
+
+        if (url.type === 'url') {
+          setValue(r.questions[questionId - 1].url.data)
+        }
         // Ensure valid quiz and question
         if ('error' in r) { history.push('/404') }
         if (questionId > r.questions.length) { history.push('/404') }
@@ -239,6 +312,7 @@ function EditQuestion () {
     history.push('/login')
   }
 
+  // All of the &&s are to prevent errors while waiting for promises to resolve
   return (
     <>
       <br/>
@@ -262,14 +336,12 @@ function EditQuestion () {
           }}
         />}
       </Grid>
-      {'solutions' in question &&
-        <Typography variant='body1'>
-          Type: {question.solutions.length === 1 ? 'Single Answer' : 'Multiple Choice'}
-        </Typography>
-      }
+      <Typography variant='body1'>
+        Type: {'solutions' in question && question.solutions.length === 1 ? 'Single Answer' : 'Multiple Choice'}
+      </Typography>
       {'url' in question &&
         <Typography variant='body1'>
-          URL: {question.url}
+          Additional Resource: {question.url.type === 'image' ? 'Image uploaded.' : `Video (${question.url.data})`}
         </Typography>
       }
       <br />
@@ -315,25 +387,64 @@ function EditQuestion () {
           <br />
         </>
       }
-      {/* TODO add way to delete URL */}
+      {/* TODO add way to delete URL, and upload image instead of url, make url object with a type field */}
       <Card>
         <CardContent>
           <Grid container direction='row'>
-            <TextField
-              label='Update Question URL'
-              onChange={(e) => {
-                setUrl(e.target.value)
-              }}
-              onBlur={() => {
-                updateQuestion(quiz, quizId, questionId, text, time, points, url)
-                setAnswerCount(answerCount + 1)
-              }}
-            />
+            {typeof url !== 'undefined' && 'type' in url && url.type === 'image'
+              ? <TextField disabled label='Image Uploaded'/>
+              : <TextField
+                label='Update Question URL'
+                value={value}
+                onChange={(e) => {
+                  setValue(e.target.value)
+                  setUrl({
+                    type: 'url',
+                    data: e.target.value
+                  })
+                }}
+                onBlur={() => {
+                  updateQuestion(quiz, quizId, questionId, text, time, points, url)
+                  setAnswerCount(answerCount + 1)
+                }}
+              />
+            }
           </Grid>
         </CardContent>
+        <CardActions>
+          <Button
+            variant='contained'
+            color='primary'
+            onClick={(e) => {
+              setUrl({})
+              setValue('')
+              updateQuestion(quiz, quizId, questionId, text, time, points, url)
+              setAnswerCount(answerCount + 1)
+            }}
+          >
+            Clear
+          </Button>
+          <Button
+            variant='contained'
+            color='primary'
+            component='label'
+          >
+            Add Image
+            <input
+              type='file'
+              value = ''
+              accept='image/png'
+              hidden
+              onChange={(e) => { setSelectedFile(e.target.files[0]) }}
+                // handle image upload and conversion
+                // e.target.files[0]
+            />
+          </Button>
+        </CardActions>
       </Card>
       <br />
 
+      {/* TODO refactor this into its own component, whole thing uses context */}
       <Card>
         <TableContainer component={CardContent}>
           <Table>

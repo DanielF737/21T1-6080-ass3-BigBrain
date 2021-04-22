@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { Link, useHistory } from 'react-router-dom'
 
 import Button from '@material-ui/core/Button'
@@ -7,11 +7,40 @@ import Card from '@material-ui/core/Card'
 import CardContent from '@material-ui/core/CardContent'
 import CardActions from '@material-ui/core/CardActions'
 import Avatar from '@material-ui/core/Avatar'
-import Grid from '@material-ui/core/Grid';
+import Grid from '@material-ui/core/Grid'
+import Modal from '@material-ui/core/Modal'
+import IconButton from '@material-ui/core/IconButton'
+import FileCopyIcon from '@material-ui/icons/FileCopy'
+import { makeStyles } from '@material-ui/core/styles'
 
 import { QuizContext } from './util/quiz'
 // TODO fix this to use config file across all files
 const api = 'http://localhost:5005/'
+
+const useStyles = makeStyles((theme) => ({
+  paper: {
+    position: 'absolute',
+    width: 400,
+    backgroundColor: theme.palette.background.paper,
+    border: '2px solid #000',
+    boxShadow: theme.shadows[5],
+    padding: theme.spacing(2, 4, 3),
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)'
+  },
+  run: {
+    position: 'absolute',
+    width: 800,
+    backgroundColor: theme.palette.background.paper,
+    border: '2px solid #000',
+    boxShadow: theme.shadows[5],
+    padding: theme.spacing(2, 4, 3),
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)'
+  }
+}));
 
 /**
  * Deletes the users auth token from the local storage, effectively signing them out
@@ -78,7 +107,16 @@ async function getQuizzes () {
     r = await fetch(`${api}admin/quiz/${ret.quizzes[i].id}`, options)
     const out = await r.json()
     out.id = ret.quizzes[i].id
+
+    if (out.active !== null) {
+      r = await fetch(`${api}admin/session/${out.active}/status`, options)
+      const res = await r.json()
+      console.log(res)
+      out.results = res.results
+    }
+
     quizzes.push(out)
+    console.log(out)
   }
   return quizzes
 }
@@ -97,26 +135,97 @@ function quizTime (questions) {
 }
 
 /**
+ * Makes the api call to start a quiz session, opens a modal contaning the
+ * session id and a link to the play url
+ * @param {Number} id the id of the quiz to start
+ */
+async function startQuiz (id) {
+  let options = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/JSON',
+      Authorization: `Bearer ${localStorage.getItem('token')}`
+    }
+  }
+
+  let r = await fetch(`${api}admin/quiz/${id}/start`, options)
+  let ret = await r.json()
+
+  options = {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/JSON',
+      Authorization: `Bearer ${localStorage.getItem('token')}`
+    }
+  }
+
+  r = await fetch(`${api}admin/quiz/${id}`, options)
+  ret = await r.json()
+
+  const body = (
+    <>
+      <Grid container direction="row" justify="center" alignItems="center" >
+        <Typography alight='center' variant='h5'>Session ID: {ret.active}</Typography>
+      </Grid>
+      <Grid container direction="row" justify="center" alignItems="center" >
+        <Typography variant='body1'>Copy session link: </Typography>
+        <IconButton color="primary" component="button" onClick={() => { navigator.clipboard.writeText(`${window.location.href}play/${ret.active}`) }}>
+          <FileCopyIcon/>
+        </IconButton>
+      </Grid>
+    </>
+  )
+
+  return body
+}
+
+/**
  * Functional component containing a list of all quizes belonging to the current user
  * @returns Component containing list of cards representing each quiz
  */
 function Quizzes () {
   const context = React.useContext(QuizContext)
+  const classes = useStyles();
   const [quizzes, setQuizzes] = context.quizzes
   const [quizCount, setQuizCount] = context.quizCount
+  const [modalOpen, setModalOpen] = context.modalOpen
+  const [modalBody, setModalBody] = context.modalBody
+  const [startId, setStartId] = context.startId
+
+  const handleClose = () => {
+    setModalOpen(false)
+    setModalBody(<></>)
+  }
 
   useEffect(() => {
-    getQuizzes()
-      .then(r => {
-        setQuizzes(r)
-      })
+    if (localStorage.getItem('token')) {
+      getQuizzes()
+        .then(r => {
+          setQuizzes(r)
+        })
+    }
   }, [quizCount])
+
+  const initialRender = useRef(true);
+
+  useEffect(() => {
+    if (initialRender.current) {
+      initialRender.current = false
+    } else if (startId === -1) {
+      // pass
+    } else {
+      startQuiz(startId)
+        .then(r => {
+          setModalBody(r)
+        })
+        .then(setStartId(-1))
+    }
+  }, [startId])
 
   return (
     <>
       {quizzes.map(i => (
         <div key={i.id}>
-          {/* TODO fix the width */}
           <Card>
             <CardContent>
               <Grid container direction='row' alignItems='center'>
@@ -152,11 +261,40 @@ function Quizzes () {
             >
               Delete
             </Button>
+            {i.active === null
+              ? <Button
+                variant='contained'
+                color='primary'
+                onClick={() => {
+                  setModalOpen(true)
+                  setStartId(i.id)
+                  setQuizCount(quizCount - 1)
+                }}
+              >
+                Start Quiz
+              </Button>
+              : <Button
+                variant='contained'
+                color='primary'
+                component={Link}
+                to={`/run/${i.id}/${i.active}`}
+              >
+                Run Quiz
+              </Button>
+            }
             </CardActions>
           </Card>
           <br />
         </div>
       ))}
+      <Modal
+        open={modalOpen}
+        onClose={handleClose}
+      >
+        <div className={classes.paper}>
+          {modalBody}
+        </div>
+      </Modal>
     </>
   )
 }

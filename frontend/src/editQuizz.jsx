@@ -217,7 +217,7 @@ function Quiz () {
             </Typography>
             {'url' in i &&
               <Typography variant='body1'>
-                URL: {i.url}
+                Additional Resource: {i.url.type === 'image' ? 'Image uploaded.' : `Video (${i.url.data})`}
               </Typography>
             }
           </CardContent>
@@ -271,6 +271,7 @@ function EditQuiz () {
   useEffect(() => {
     getQuiz(id)
       .then(r => {
+        console.log(r)
         setQuiz(r)
 
         if ('error' in r) {
@@ -323,6 +324,7 @@ function EditQuiz () {
           accept='image/png'
           hidden
           onChange={(e) => {
+            // TODO maybe use a useEffect hook?
             updateThumb(quiz, id, e.target.files[0])
             setQuestionCount(questionCount - 1)
           }}

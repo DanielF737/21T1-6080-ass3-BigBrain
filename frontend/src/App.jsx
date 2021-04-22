@@ -15,6 +15,9 @@ import EditQuiz from './editQuizz'
 import EditQuestion from './editQuestion'
 import QuizProvider from './util/quiz'
 import EditQuizProvider from './util/editQuiz'
+import Results from './results'
+import Run from './run'
+import Play from './play'
 
 import AppBar from '@material-ui/core/AppBar'
 import Container from '@material-ui/core/Container'
@@ -53,14 +56,21 @@ function App () {
               <Register />
             </Route>
             <Route path ='/edit/:quizId/question/:questionId'>
-              <EditQuizProvider>
-                <EditQuestion/>
-              </EditQuizProvider>
+              <EditQuestion/>
             </Route>
             <Route path ='/edit/:id'>
               <EditQuizProvider>
                 <EditQuiz/>
               </EditQuizProvider>
+            </Route>
+            <Route path ='/results/:id'>
+              <Results />
+            </Route>
+            <Route path ='/run/:id/:sessionId'>
+              <Run />
+            </Route>
+            <Route path ='/play/:id?'>
+              <Play />
             </Route>
           <Route path='*'>
             <h1>404 Page Not Found</h1>
