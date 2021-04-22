@@ -286,68 +286,73 @@ function EditQuiz () {
 
   return (
     <>
-      <br/>
-      <Grid container direction='row' alignItems='center'>
-        <Avatar
-          variant='rounded'
-          display='inline'
-          alt='Quiz Thumbnail'
-          src={quiz.thumbnail}
-        />
-        {'name' in quiz && <TextField
-          defaultValue={quiz.name}
-          InputProps={{
-            classes: {
-              input: classes.title,
-            },
-          }}
-          onChange={(e) => {
-            setUpdated(e.target.value)
-          }}
-          onBlur={() => {
-            updateName(quiz, id, updated)
-            setQuestionCount(questionCount + 1)
-          }}
-        />}
-      </Grid>
-      <br />
-      <Quiz/>
-      <br />
-      <Button
-        variant='contained'
-        color='primary'
-        component='label'
-      >
-        Update Thumbnail
-        <input
-          type='file'
-          accept='image/png'
-          hidden
-          onChange={(e) => {
-            // TODO maybe use a useEffect hook?
-            updateThumb(quiz, id, e.target.files[0])
-            setQuestionCount(questionCount - 1)
-          }}
-        />
-      </Button>
-      <Button
-        variant='contained'
-        color='primary'
-        onClick={() => {
-          newQuestion(quiz, id)
-          setQuestionCount(questionCount + 1)
-        }}
-      >
-        Add Question
-      </Button>
+      <Card>
+        <CardContent>
+          <br/>
+          <Grid container direction='row' alignItems='center'>
+            <Avatar
+              variant='rounded'
+              display='inline'
+              alt='Quiz Thumbnail'
+              src={quiz.thumbnail}
+            />
+            {'name' in quiz && <TextField
+              defaultValue={quiz.name}
+              InputProps={{
+                classes: {
+                  input: classes.title,
+                },
+              }}
+              onChange={(e) => {
+                setUpdated(e.target.value)
+              }}
+              onBlur={() => {
+                updateName(quiz, id, updated)
+                setQuestionCount(questionCount + 1)
+              }}
+            />}
+          </Grid>
+          <br />
+          <Quiz/>
+        </CardContent>
+        <CardActions>
+          <Button
+            variant='contained'
+            color='primary'
+            component='label'
+          >
+            Update Thumbnail
+            <input
+              type='file'
+              accept='image/png'
+              hidden
+              onChange={(e) => {
+                // TODO maybe use a useEffect hook?
+                updateThumb(quiz, id, e.target.files[0])
+                setQuestionCount(questionCount - 1)
+              }}
+            />
+          </Button>
+          <Button
+            variant='contained'
+            color='primary'
+            onClick={() => {
+              newQuestion(quiz, id)
+              setQuestionCount(questionCount + 1)
+            }}
+          >
+            Add Question
+          </Button>
 
-      <Button
-        variant='contained'
-        color='primary'
-        component={Link} to='/'
-      >
-        Back
-      </Button>
+          <Button
+            variant='contained'
+            color='primary'
+            component={Link} to='/'
+          >
+            Back
+          </Button>
+        </CardActions>
+      </Card>
     </>
   )
 }

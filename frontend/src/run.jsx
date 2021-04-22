@@ -195,6 +195,7 @@ function Run () {
           <Button
             variant='contained'
             color='primary'
+            name='stop'
             onClick={() => {
               setModalOpen(true)
               stopQuiz(id)
@@ -238,7 +239,7 @@ function Run () {
           </Grid>
           <Grid container direction="row" justify="center" alignItems="center" >
             <Typography variant='body1'>View results? </Typography>
-            <IconButton color="primary" component={Link} to={`/results/${sessionId}`} >
+            <IconButton name='results' color="primary" component={Link} to={`/results/${sessionId}`} >
               <ExitToAppIcon/>
             </IconButton>
           </Grid>

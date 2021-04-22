@@ -10,6 +10,7 @@ import { makeStyles } from '@material-ui/core/styles'
 import Container from '@material-ui/core/Container'
 import Alert from '@material-ui/lab/Alert';
 
+import { AppContext } from './util/app'
 const api = 'http://localhost:5005/'
 
 const useStyles = makeStyles((theme) => ({
@@ -67,10 +68,12 @@ async function login (email, password) {
 
 const Login = (props) => {
   const history = useHistory()
+  const context = React.useContext(AppContext)
+  const [loggedIn, setLoggedIn] = context.loggedIn
   if (localStorage.getItem('token')) {
     history.push('/')
   }
-
+  console.log(loggedIn)
   const classes = useStyles()
   const [email, setEmail] = React.useState('')
   const [pWord, setPWord] = React.useState('')
@@ -121,6 +124,7 @@ const Login = (props) => {
                 .then(r => {
                   setError(r)
                   if (r === '') {
+                    setLoggedIn(true)
                     history.push('/')
                   }
                 })
@@ -130,7 +134,7 @@ const Login = (props) => {
           </Button>
           <Grid container>
             <Grid item>
-              <Link href='/register' variant='body2'>
+              <Link name='register' href='/register' variant='body2'>
                 {'Don\'t have an account? Sign Up'}
               </Link>
             </Grid>

@@ -43,15 +43,6 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 /**
- * Deletes the users auth token from the local storage, effectively signing them out
- */
-function signOut () {
-  if (localStorage.getItem('token')) {
-    localStorage.removeItem('token')
-  }
-}
-
-/**
  * Makes the API call to create a new quiz from the currently signed in user
  */
 async function newQuiz () {
@@ -162,21 +153,7 @@ async function startQuiz (id) {
   r = await fetch(`${api}admin/quiz/${id}`, options)
   ret = await r.json()
 
-  const body = (
-    <>
-      <Grid container direction="row" justify="center" alignItems="center" >
-        <Typography alight='center' variant='h5'>Session ID: {ret.active}</Typography>
-      </Grid>
-      <Grid container direction="row" justify="center" alignItems="center" >
-        <Typography variant='body1'>Copy session link: </Typography>
-        <IconButton color="primary" component="button" onClick={() => { navigator.clipboard.writeText(`${window.location.href}play/${ret.active}`) }}>
-          <FileCopyIcon/>
-        </IconButton>
-      </Grid>
-    </>
-  )
-
-  return body
+  return (ret.active)
 }
 
 /**
@@ -194,7 +171,6 @@ function Quizzes () {
 
   const handleClose = () => {
     setModalOpen(false)
-    setModalBody(<></>)
   }
 
   useEffect(() => {
@@ -265,6 +241,7 @@ function Quizzes () {
               ? <Button
                 variant='contained'
                 color='primary'
+                name='start'
                 onClick={() => {
                   setModalOpen(true)
                   setStartId(i.id)
@@ -276,6 +253,7 @@ function Quizzes () {
               : <Button
                 variant='contained'
                 color='primary'
+                name='open'
                 component={Link}
                 to={`/run/${i.id}/${i.active}`}
               >
@@ -292,7 +270,18 @@ function Quizzes () {
         onClose={handleClose}
       >
         <div className={classes.paper}>
-          {modalBody}
+          <Grid container direction="row" justify="center" alignItems="center" >
+            <Typography alight='center' variant='h5'>Session ID: {modalBody}</Typography>
+          </Grid>
+          <Grid container direction="row" justify="center" alignItems="center" >
+            <Typography variant='body1'>Copy session link: </Typography>
+            <IconButton color="primary" name='copy' component="button" onClick={() => {
+              navigator.clipboard.writeText(`${window.location.href}play/${modalBody}`)
+              handleClose()
+            }}>
+              <FileCopyIcon/>
+            </IconButton>
+          </Grid>
         </div>
       </Modal>
     </>
@@ -308,6 +297,7 @@ function Dashboard () {
   const context = React.useContext(QuizContext)
   const [quizCount, setQuizCount] = context.quizCount
 
+  console.log(history)
   if (!localStorage.getItem('token')) {
     history.push('/login')
   }
@@ -315,32 +305,27 @@ function Dashboard () {
   return (
     <>
       <br/>
-      <Typography variant='h3' gutterBottom>
-        Dashboard
-      </Typography>
-      <Quizzes />
-
-      <Button
-        variant='contained'
-        color='primary'
-        onClick={() => {
-          newQuiz()
-          setQuizCount(quizCount + 1)
-        }}
-      >
-        New Quiz
-      </Button>
-
-      <Button
-        variant='contained'
-        color='primary'
-        onClick={() => {
-          signOut()
-          history.push('/login')
-        }}
-      >
-        Sign Out
-      </Button>
+      <Card>
+        <CardContent>
+          <Typography variant='h3' gutterBottom>
+            Dashboard
+          </Typography>
+          <Quizzes />
+        </CardContent>
+        <CardActions>
+          <Button
+            variant='contained'
+            color='primary'
+            name='new'
+            onClick={() => {
+              newQuiz()
+              setQuizCount(quizCount + 1)
+            }}
+          >
+            New Quiz
+          </Button>
+        </CardActions>
+      </Card>
     </>
   )
 }
