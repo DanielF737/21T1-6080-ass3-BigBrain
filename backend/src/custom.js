@@ -1,10 +1,10 @@
 /*
  For a given data structure of a question, produce another
  object that doesn't contain any important meta data (e.g. the answer)
- to return to a "player"
+ to return to a 'player'
 */
 export const quizQuestionPublicReturn = question => {
-  console.log('See question: ', question);
+  console.log('See question: ', question)
   let obj = {
     text: question.text,
     points: question.points,
@@ -14,8 +14,8 @@ export const quizQuestionPublicReturn = question => {
     sols: question.solutions.length
   }
   if ('url' in question) {obj.url = question.url}
-  return obj;
-};
+  return obj
+}
 
 /*
  For a given data structure of a question, get the IDs of
@@ -23,7 +23,7 @@ export const quizQuestionPublicReturn = question => {
 */
 export const quizQuestionGetCorrectAnswers = question => {
   return question.solutions
-};
+}
 
 /*
  For a given data structure of a question, get the IDs of
@@ -35,12 +35,12 @@ export const quizQuestionGetAnswers = question => {
     a.push(question.answers[i].id)
   }
   return question.answers
-};
+}
 
 /*
  For a given data structure of a question, get the duration
  of the question once it starts. (Seconds)
 */
 export const quizQuestionGetDuration = question => {
-  return question.time;
-};
+  return question.time
+}
